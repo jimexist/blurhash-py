@@ -1,8 +1,11 @@
 import enum
+from contextlib import nullcontext
+
+from PIL import Image
 
 from ._lib_name import blurhash_for_pixels_py, decode_blurhash_py, is_valid_blurhash_py
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 __all__ = (
     "BlurhashDecodeError",
@@ -29,9 +32,6 @@ class BlurhashDecodeError(Exception):
 
 def encode(image, x_components: int, y_components: int) -> str:
     """Encode an image to a blurhash string."""
-    from contextlib import nullcontext
-    from PIL import Image
-
     if isinstance(image, Image.Image):
         image_context = nullcontext()
     else:
@@ -64,7 +64,7 @@ def decode(
     height: int,
     punch: float = 1,
     mode: PixelMode = PixelMode.RGB,
-) -> Image.Image:
+):
     """Decode a blurhash string to an image."""
     if width <= 0 or not isinstance(width, int):
         msg = f"Argument width={width} is not a valid positive integer (must be > 0)."

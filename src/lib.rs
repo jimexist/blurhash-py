@@ -93,6 +93,19 @@ fn encode_ac(r: f32, g: f32, b: f32, maximum_value: f32) -> i32 {
     quant_r * 19 * 19 + quant_g * 19 + quant_b
 }
 
+/// Computes cosines for given n, bound, and scale.
+/// Returns a Vec<f32> of cos(PI * n * i / scale) for each i in 0..bound.
+fn precompute_cosines(n: i32, bound: i32, scale: i32) -> Vec<f32> {
+    let mut cosines = Vec::with_capacity(bound as usize);
+    let n = n as f32;
+    let scale = scale as f32;
+    for i in 0..bound {
+        let val = (PI * n * i as f32 / scale).cos();
+        cosines.push(val);
+    }
+    cosines
+}
+
 fn multiply_basis_function(
     x_component: i32,
     y_component: i32,
@@ -100,6 +113,8 @@ fn multiply_basis_function(
     height: i32,
     rgb: &[u8],
     bytes_per_row: usize,
+    cos_x: &[f32], // NEW: Precomputed cosines for x
+    cos_y: &[f32], // NEW: Precomputed cosines for y
 ) -> (f32, f32, f32) {
     let mut result = [0.0f32; 3];
     let normalisation = if x_component == 0 && y_component == 0 {
@@ -110,8 +125,7 @@ fn multiply_basis_function(
 
     for y in 0..height {
         for x in 0..width {
-            let basis = (PI * x_component as f32 * x as f32 / width as f32).cos()
-                * (PI * y_component as f32 * y as f32 / height as f32).cos();
+            let basis = cos_x[x as usize] * cos_y[y as usize];
             let base = 3 * x as usize + y as usize * bytes_per_row;
             let channels = [rgb[base], rgb[base + 1], rgb[base + 2]];
             let linear = [
@@ -144,7 +158,11 @@ pub fn blurhash_for_pixels(
 
     for y in 0..y_components {
         for x in 0..x_components {
-            let (r, g, b) = multiply_basis_function(x, y, width, height, rgb, bytes_per_row);
+            // Precompute cosines for x and y dimensions with respect to the component
+            let cos_x = precompute_cosines(x, width, width);
+            let cos_y = precompute_cosines(y, height, height);
+            let (r, g, b) =
+                multiply_basis_function(x, y, width, height, rgb, bytes_per_row, &cos_x, &cos_y);
             factors[(y * x_components + x) as usize] = [r, g, b];
         }
     }
@@ -234,14 +252,23 @@ fn decode_blurhash(blurhash: &str, width: usize, height: usize, punch: f32) -> O
         factors.push(decode_ac(ac_value, max_ac * punch));
     }
 
+    // Precompute cosines for all basis function indices and all pixel positions for efficiency
+    let mut cosines_x = Vec::with_capacity(num_x);
+    for i in 0..num_x {
+        cosines_x.push(precompute_cosines(i as i32, width as i32, width as i32));
+    }
+    let mut cosines_y = Vec::with_capacity(num_y);
+    for j in 0..num_y {
+        cosines_y.push(precompute_cosines(j as i32, height as i32, height as i32));
+    }
+
     let mut pixels = vec![0u8; width * height * 3];
     for y in 0..height {
         for x in 0..width {
             let (mut r, mut g, mut b) = (0.0, 0.0, 0.0);
             for j in 0..num_y {
                 for i in 0..num_x {
-                    let basis = (PI * x as f32 * i as f32 / width as f32).cos()
-                        * (PI * y as f32 * j as f32 / height as f32).cos();
+                    let basis = cosines_x[i][x] * cosines_y[j][y];
                     let [fr, fg, fb] = factors[j * num_x + i];
                     r += fr * basis;
                     g += fg * basis;
