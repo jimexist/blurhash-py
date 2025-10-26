@@ -1,5 +1,4 @@
 from enum import IntEnum
-from itertools import chain
 
 from PIL import Image
 
@@ -36,11 +35,7 @@ def encode(image, x_components: int, y_components: int) -> str:
         image = Image.open(image)
     if image.mode != "RGB":
         image = image.convert("RGB")
-    # Create flat RGB data as list in row-major order
-    red_band = image.getdata(band=0)
-    green_band = image.getdata(band=1)
-    blue_band = image.getdata(band=2)
-    rgb_data = list(chain.from_iterable(zip(red_band, green_band, blue_band)))
+    rgb_data = image.to_bytes()
     width, height = image.size
     image.close()
 
