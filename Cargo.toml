@@ -1,7 +1,9 @@
 [package]
 name = "blurhash-py"
-version = "0.1.0"
+description = "A Python and rust library for encoding and decoding blurhash strings"
+version = "0.1.1"
 edition = "2021"
+repository = "https://github.com/jimexist/blurhash-py"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
