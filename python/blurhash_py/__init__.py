@@ -31,13 +31,18 @@ class BlurhashDecodeError(Exception):
 
 def encode(image, x_components: int, y_components: int) -> str:
     """Encode an image to a blurhash string."""
-    if not isinstance(image, Image.Image):
+    from contextlib import nullcontext
+
+    if isinstance(image, Image.Image):
+        image_context = nullcontext()
+    else:
         image = Image.open(image)
-    if image.mode != "RGB":
-        image = image.convert("RGB")
-    rgb_data = image.to_bytes()
-    width, height = image.size
-    image.close()
+        image_context = image
+    with image_context:
+        if image.mode != "RGB":
+            image = image.convert("RGB")
+        rgb_data = image.tobytes()
+        width, height = image.size
 
     result = blurhash_for_pixels_py(
         x_components,

@@ -7,6 +7,23 @@ fn clamp_to_ubyte(src: i32) -> u8 {
     src.clamp(0, 255) as u8
 }
 
+// Use lazy_static for global cache of sRGB to linear conversion
+
+lazy_static::lazy_static! {
+    static ref SRGB_TO_LINEAR_CACHE: [f32; 256] = {
+        let mut arr = [0.0f32; 256];
+        for x in 0..256 {
+            arr[x] = srgb_to_linear(x as u8);
+        }
+        arr
+    };
+}
+
+/// Get sRGB to linear value from the cache (thread-safe, initializes on first use).
+fn srgb_to_linear_cached(value: u8) -> f32 {
+    SRGB_TO_LINEAR_CACHE[value as usize]
+}
+
 /// sRGB to linear, float in [0,1]
 fn srgb_to_linear(value: u8) -> f32 {
     let v = value as f32 / 255.0;
@@ -98,9 +115,9 @@ fn multiply_basis_function(
             let base = 3 * x as usize + y as usize * bytes_per_row;
             let channels = [rgb[base], rgb[base + 1], rgb[base + 2]];
             let linear = [
-                srgb_to_linear(channels[0]),
-                srgb_to_linear(channels[1]),
-                srgb_to_linear(channels[2]),
+                srgb_to_linear_cached(channels[0]),
+                srgb_to_linear_cached(channels[1]),
+                srgb_to_linear_cached(channels[2]),
             ];
             for (acc, v) in result.iter_mut().zip(linear) {
                 *acc += basis * v;
