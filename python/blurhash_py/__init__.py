@@ -5,7 +5,7 @@ from PIL import Image
 
 from ._lib_name import blurhash_for_pixels_py, decode_blurhash_py, is_valid_blurhash_py
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 
 __all__ = (
     "BlurhashDecodeError",

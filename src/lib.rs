@@ -156,13 +156,24 @@ pub fn blurhash_for_pixels(
     let num_factors = (x_components * y_components) as usize;
     let mut factors: Vec<[f32; 3]> = vec![[0.0; 3]; num_factors];
 
+    // Precompute all cos_x for each x_component
+    let mut all_cos_x: Vec<Vec<f32>> = Vec::with_capacity(x_components as usize);
+    for x in 0..x_components {
+        all_cos_x.push(precompute_cosines(x, width, width));
+    }
+
+    // Precompute all cos_y for each y_component
+    let mut all_cos_y: Vec<Vec<f32>> = Vec::with_capacity(y_components as usize);
+    for y in 0..y_components {
+        all_cos_y.push(precompute_cosines(y, height, height));
+    }
+
     for y in 0..y_components {
         for x in 0..x_components {
-            // Precompute cosines for x and y dimensions with respect to the component
-            let cos_x = precompute_cosines(x, width, width);
-            let cos_y = precompute_cosines(y, height, height);
+            let cos_x = &all_cos_x[x as usize];
+            let cos_y = &all_cos_y[y as usize];
             let (r, g, b) =
-                multiply_basis_function(x, y, width, height, rgb, bytes_per_row, &cos_x, &cos_y);
+                multiply_basis_function(x, y, width, height, rgb, bytes_per_row, cos_x, cos_y);
             factors[(y * x_components + x) as usize] = [r, g, b];
         }
     }
