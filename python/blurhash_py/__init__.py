@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from enum import IntEnum
 from itertools import chain
 
@@ -7,7 +5,7 @@ from PIL import Image
 
 from ._lib_name import blurhash_for_pixels_py, decode_blurhash_py, is_valid_blurhash_py
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 __all__ = [
     "BlurhashDecodeError",

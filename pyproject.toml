@@ -4,17 +4,24 @@ build-backend = "maturin"
 
 [project]
 name = "blurhash-py"
+description = "A Python and rust library for encoding and decoding blurhash strings"
 requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: Scientific/Engineering :: Image Processing",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 dynamic = ["version"]
 dependencies = ["pillow>=8.0.0"]
-
-[project.optional-dependencies]
-test = ["pytest"]
+urls = { repository = "https://github.com/jimexist/blurhash-py" }
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
