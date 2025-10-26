@@ -1,22 +1,20 @@
-from enum import IntEnum
-
-from PIL import Image
+import enum
 
 from ._lib_name import blurhash_for_pixels_py, decode_blurhash_py, is_valid_blurhash_py
 
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 
-__all__ = [
+__all__ = (
     "BlurhashDecodeError",
     "PixelMode",
     "__version__",
     "decode",
     "encode",
     "is_valid_blurhash",
-]
+)
 
 
-class PixelMode(IntEnum):
+class PixelMode(enum.IntEnum):
     RGB = 3
     RGBA = 4
 
@@ -32,6 +30,7 @@ class BlurhashDecodeError(Exception):
 def encode(image, x_components: int, y_components: int) -> str:
     """Encode an image to a blurhash string."""
     from contextlib import nullcontext
+    from PIL import Image
 
     if isinstance(image, Image.Image):
         image_context = nullcontext()
