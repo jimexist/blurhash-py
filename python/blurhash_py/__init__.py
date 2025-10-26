@@ -1,5 +1,4 @@
 from enum import IntEnum
-from itertools import chain
 
 from PIL import Image
 
@@ -32,17 +31,18 @@ class BlurhashDecodeError(Exception):
 
 def encode(image, x_components: int, y_components: int) -> str:
     """Encode an image to a blurhash string."""
-    if not isinstance(image, Image.Image):
+    from contextlib import nullcontext
+
+    if isinstance(image, Image.Image):
+        image_context = nullcontext()
+    else:
         image = Image.open(image)
-    if image.mode != "RGB":
-        image = image.convert("RGB")
-    # Create flat RGB data as list in row-major order
-    red_band = image.getdata(band=0)
-    green_band = image.getdata(band=1)
-    blue_band = image.getdata(band=2)
-    rgb_data = list(chain.from_iterable(zip(red_band, green_band, blue_band)))
-    width, height = image.size
-    image.close()
+        image_context = image
+    with image_context:
+        if image.mode != "RGB":
+            image = image.convert("RGB")
+        rgb_data = image.tobytes()
+        width, height = image.size
 
     result = blurhash_for_pixels_py(
         x_components,
