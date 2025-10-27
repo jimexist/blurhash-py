@@ -21,7 +21,11 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = ["pillow>=8.0.0"]
+maintainers = [{ name = "Jiayu Liu", email = "jiayu@hey.com" }]
 urls = { repository = "https://github.com/jimexist/blurhash-py" }
+readme = "README.md"
+license = "MIT"
+keywords = ["blurhash", "image", "compression"]
 
 [tool.maturin]
 features = ["pyo3/extension-module"]

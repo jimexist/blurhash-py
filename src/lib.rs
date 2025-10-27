@@ -8,7 +8,6 @@ fn clamp_to_ubyte(src: i32) -> u8 {
 }
 
 // Use lazy_static for global cache of sRGB to linear conversion
-
 lazy_static::lazy_static! {
     static ref SRGB_TO_LINEAR_CACHE: [f32; 256] = {
         let mut arr = [0.0f32; 256];

@@ -5,7 +5,7 @@ from PIL import Image
 
 from ._lib_name import blurhash_for_pixels_py, decode_blurhash_py, is_valid_blurhash_py
 
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 
 __all__ = (
     "BlurhashDecodeError",
@@ -84,16 +84,11 @@ def decode(
 
     channels = mode.value
 
-    # Call the Rust decode wrapper: returns bytes, rgb order, row-major
     try:
         bytes_data = decode_blurhash_py(blurhash, width, height, punch)
     except Exception:
         raise BlurhashDecodeError(blurhash)
 
-    # decode_blurhash_py returns a Python bytes object.
-    # NB: While mode=RGBA might be supported, our Rust code outputs only RGB,
-    # so we only support RGB at the moment. If/when RGBA is supported,
-    # handle accordingly.
     if not bytes_data or len(bytes_data) != width * height * channels:
         raise BlurhashDecodeError(blurhash)
 
